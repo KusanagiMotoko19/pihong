@@ -12,11 +12,11 @@ export function VerdictView({
   onRestart: () => void
 }) {
   const shichen =
-    verdict.score >= 55
+    verdict.score >= 65
       ? '史臣曰：帝初亲政，锐意有为，综核名实，不惑于众口。使天假之年，其功岂在李成梁、潘季驯之下哉。'
-      : verdict.score >= 30
+      : verdict.score >= 40
         ? '史臣曰：帝守成而已。无所大失，亦无所大立。天下之病，仍在腠理。'
-        : verdict.score >= 10
+        : verdict.score >= 15
           ? '史臣曰：帝在位初期，循常守故。然法久必弊，弊久必弛，帝未尝一振之。'
           : '史臣曰：帝自亲政之始，即倦于勤。章奏留中，政务壅滞。明之衰，自此始也。'
 
@@ -73,7 +73,7 @@ export function VerdictView({
       </button>
 
       <div className="note" style={{ marginTop: 26, fontSize: 12 }}>
-        此为技术验证版。十二个月的剧本走完即止，真正的游戏会有四十八年。
+        此为技术验证版。五年的剧本走完即止，真正的游戏会有四十八年。
       </div>
     </div>
   )

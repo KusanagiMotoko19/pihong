@@ -379,6 +379,8 @@ export const fbImpeach = def(
     line: 'eunuch',
     when: (s) => s.date.year === 1582 && s.date.month >= 11,
     cooldown: 999,
+    // 抄冯保只有一次。史书上这一笔，也只记了一次
+    once: true,
     sets: ['fb_charged'],
     forbids: ['fb_charged'],
   },

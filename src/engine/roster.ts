@@ -266,11 +266,16 @@ export function isVacant(officers: Officer[], officeId: string): boolean {
   return !officers.some((o) => o.officeId === officeId)
 }
 
-/** 人才库里挑几个能补某个缺的，按声望排序 */
-export function candidatesFor(officers: Officer[], officeId: string, n = 3): Officer[] {
+/** 人才库里挑几个能补某个缺的，按声望排序。守制的人不在名单里 */
+export function candidatesFor(
+  officers: Officer[],
+  officeId: string,
+  n = 3,
+  turn = 0,
+): Officer[] {
   const slot = OFFICE_BY_ID.get(officeId)
   if (!slot) return []
-  const pool = officers.filter((o) => o.officeId === null)
+  const pool = officers.filter((o) => o.officeId === null && (o.leaveUntil ?? 0) <= turn)
   // 品级越高，越看声望与干才
   const scored = pool.map((o) => ({
     o,

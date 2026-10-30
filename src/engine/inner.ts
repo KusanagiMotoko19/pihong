@@ -213,8 +213,9 @@ export function buildPalace(s: WorldState, kind: 'palace' | 'tomb' | 'temple'): 
 export function royalManorIncome(s: WorldState): number {
   const head = innerHead(s, 'yumajian')
   if (!head) return 0
-  // 干得多收得多，但贪的会截留
-  const gross = 1 + head.competence / 40
+  // 皇庄的庄子就那么多，收得再狠也有个数。
+  // 干得多收得多，贪的会截留 —— 净解进内帑的，一旬也就一万几千两。
+  const gross = 0.55 + head.competence / 55
   const kept = gross * (head.greed / 220)
   return Math.max(0, gross - kept)
 }

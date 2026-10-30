@@ -1,5 +1,6 @@
 import type { WorldState } from '../engine/types'
 import { dateCN, monthFromTurn } from '../engine/util'
+import { clearanceGain } from '../engine/rules'
 
 const STAGE: Record<string, string> = { prep: '筹备', promote: '推行', close: '收尾' }
 
@@ -71,6 +72,29 @@ export function ProjectModal({
             已支 {Math.round(p.spent)} / 拨 {Math.round(p.budget)} 万两
           </b>
         </div>
+
+        {/* 清丈的账：清出来的田，要让它看得见 —— 否则「告竣」只是两个字 */}
+        {p.id === 'qingzhang' && (
+          <div className="sec-row">
+            <span>田亩</span>
+            <div style={{ flex: 1 }} />
+            <b>
+              已清出隐占田约 {clearanceGain(p).qing} 万顷 · 岁入增约 {clearanceGain(p).silver} 万两
+            </b>
+          </div>
+        )}
+
+        {/* 投献：清丈的对头。丈得出来，献得回去 */}
+        {(s.flags.touxian ?? 0) > 0 && (
+          <div className="sec-row">
+            <span>投献</span>
+            <div style={{ flex: 1 }} />
+            <b style={{ color: 'var(--cinnabar)' }}>
+              已投献 {Math.min(15, s.flags.touxian ?? 0)} 成 · 税基减
+              {Math.min(30, (s.flags.touxian ?? 0) * 2)}%
+            </b>
+          </div>
+        )}
 
         <h4 className="sub-title">谁在反对</h4>
         {p.opponents.map((o, i) => (

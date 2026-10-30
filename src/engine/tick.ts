@@ -1,6 +1,7 @@
 import type { Memorial, WorldState } from './types'
 import { clamp } from './util'
 import {
+  K,
   applyEffect,
   computeReported,
   tickBacklog,
@@ -29,7 +30,7 @@ export function nextDate(d: { year: number; month: number; xun: number }) {
 /** 开局把本子铺到案头 */
 export function initQueue(s: WorldState): WorldState {
   const next = structuredClone(s)
-  next.queue = generateIncoming(next, 4)
+  next.queue = generateIncoming(next, 10)
   next.incoming = next.queue.length
   next.reported = computeReported(next)
   return next
@@ -49,8 +50,8 @@ export function advanceTurn(s: WorldState): WorldState {
   /* 2. 财政 */
   tickTreasury(next)
 
-  /* 2b. 皇庄进项：内帑自己会生钱，看御马监那个人 */
-  next.neitang += royalManorIncome(next)
+  /* 2b. 皇庄进项：内帑自己会生钱，看御马监那个人；用度也在这一笔里出 */
+  next.neitang = Math.max(0, next.neitang + royalManorIncome(next) - K.INNER_COST)
 
   /* 3. 九边：饷能发得出，兵就还能站 */
   tickFrontiers(next)
@@ -60,6 +61,9 @@ export function advanceTurn(s: WorldState): WorldState {
 
   /* 4b. 百官考课：民心、官风、朝局，是在位的人干出来的 */
   tickBureaucracy(next)
+
+  /* 4b1. 四维见底的时候，国家会自己坏下去 —— 这是「崩坏迹象」 */
+  tickCrisis(next)
 
   /* 4b2. 律令：制度在暗处用力，当旬看不出，三年五年就看出了 */
   tickStatutes(next)
@@ -144,8 +148,10 @@ export function advanceTurn(s: WorldState): WorldState {
   next.date = nextDate(next.date)
   next.energy = next.maxEnergy
 
-  /* 11. 新本进案 */
-  const fresh = generateIncoming(next, 3 + (next.turn % 2))
+  /* 11. 新本进案。
+     一旬进十到十二本，而你的精力只有十点 —— 读六本、召对两次，剩下的只能依拟或留中。
+     这就是皇帝的真实处境：不是没本子看，是看不完。 */
+  const fresh = generateIncoming(next, 10 + (next.turn % 3))
   next.queue.push(...fresh)
   next.incoming = fresh.length
   next.pending = []
@@ -157,6 +163,83 @@ export function advanceTurn(s: WorldState): WorldState {
   if (next.turn >= TOTAL_TURNS) next.over = true
 
   return next
+}
+
+/**
+ * 四维见底。
+ *
+ * 数值低到一定程度，不是「数字不好看」，是国家真的开始坏：
+ * 政令出不了京、盗贼破县城、库银失窃、边镇失守。
+ * 这些不是随机事件 —— 是玩家的账到期了。
+ */
+function tickCrisis(s: WorldState): void {
+  const t = s.truth
+
+  // 朝局：政令出不了京
+  if (t.chaoshi < 20) {
+    s.taicang -= 1.5
+    s.backlog = Math.max(0, s.backlog + 0.4)
+    if (!s.flags.crisis_chaoshi) {
+      s.flags.crisis_chaoshi = 1
+      s.log.push({
+        turn: s.turn,
+        text: '廷议三日不决，政令中格。六部各持一说，无人肯署名。外省的文书到了通政司，压着不发。',
+        tone: 'bad',
+      })
+    }
+  }
+
+  // 民心：民变
+  if (t.minxin < 20) {
+    s.taicang -= 2
+    t.guanfeng = clamp(t.guanfeng - 0.2, 0, 100)
+    if (!s.flags.crisis_minxin) {
+      s.flags.crisis_minxin = 1
+      s.log.push({
+        turn: s.turn,
+        text: '陕西、河南盗起，聚众数千，破县城二。有司请兵，兵部无饷可发；请赈，户部无粮可拨。',
+        tone: 'bad',
+      })
+    }
+  }
+
+  // 官风：贪墨公行
+  if (t.guanfeng < 20) {
+    s.taicang -= 1.5
+    if (!s.flags.crisis_guanfeng) {
+      s.flags.crisis_guanfeng = 1
+      s.log.push({
+        turn: s.turn,
+        text: '户部库银失窃三万，守库吏与主事皆逃。查了三个月，查不下去 —— 查的人也在分这笔钱。',
+        tone: 'bad',
+      })
+    }
+  }
+
+  // 边防：边镇失守
+  if (t.bianfang < 20) {
+    t.minxin = clamp(t.minxin - 0.5, 0, 100)
+    s.taicang -= 1
+    if (!s.flags.crisis_bianfang) {
+      s.flags.crisis_bianfang = 1
+      s.log.push({
+        turn: s.turn,
+        text: '边报：一镇失守，守将战死。虏骑入边二百里，掠人畜数万，三日不退。',
+        tone: 'bad',
+      })
+    }
+  }
+
+  // 三面见底：亡国之象
+  const broken = [t.minxin, t.guanfeng, t.chaoshi, t.bianfang].filter((v) => v < 20).length
+  if (broken >= 3 && !s.flags.crisis_total) {
+    s.flags.crisis_total = 1
+    s.log.push({
+      turn: s.turn,
+      text: '四维之中，三面见底。京师米价一日三涨，宫门外有人卖儿。内帑尚有银，而天下已无人肯为你办事。',
+      tone: 'bad',
+    })
+  }
 }
 
 export interface PersonVerdict {
@@ -259,15 +342,92 @@ export function evaluate(s: WorldState): Verdict {
     score -= 8
   }
 
-  if (s.backlog >= 24) {
+  /* 民心 —— 本纪里最常提起的一句，也是奏报里最不可信的一项 */
+  if (s.truth.minxin < 30) {
+    lines.push('各省饥民聚于山泽，掠富室，有司捕之不能尽。而赋役如故。')
+    score -= 18
+  } else if (s.truth.minxin < 45) {
+    lines.push('民力已疲。州县催科如故，而仓廪日虚。')
+    score -= 9
+  } else if (s.truth.minxin >= 68) {
+    lines.push('民间稍安，荒田有人开垦。')
+    score += 8
+  }
+
+  /* 官风 */
+  if (s.truth.guanfeng < 40) {
+    lines.push('吏治大坏，贪声载路。考语不足信，而考成亦不足恃。')
+    score -= 12
+  } else if (s.truth.guanfeng >= 72) {
+    lines.push('百官尚知自爱。考语虽不尽实，大体可据。')
+    score += 6
+  }
+
+  /* 朝局 */
+  if (s.truth.chaoshi < 35) {
+    lines.push('朝局倾轧，各持门户。政令出而中格，阁部相攻者数年。')
+    score -= 14
+  } else if (s.truth.chaoshi >= 70) {
+    lines.push('朝局粗安，阁部相安无事。')
+    score += 6
+  }
+
+  /* 留中：章奏压在案上，事就没了下文 */
+  if (s.backlog >= 120) {
+    lines.push(`案上未批之章，前后逾百件。天下事，从此委之他人。`)
+    score -= 30
+  } else if (s.backlog >= 60) {
+    lines.push(`留中不报者${Math.round(s.backlog)}件。政事壅滞，自此成习。`)
+    score -= 18
+  } else if (s.backlog >= 24) {
     lines.push('案头积压之章，始终未清。政务壅滞，自此成习。')
     score -= 10
   }
 
-  const title =
-    score >= 55 ? '可谓有为' : score >= 30 ? '守成之主' : score >= 10 ? '庸庸无失' : '自此始怠'
+  /* 三事俱修：民安、吏谨、朝局可观 —— 这三样凑齐的时候，史书才肯写一句好话 */
+  const trim = [s.truth.minxin, s.truth.guanfeng, s.truth.chaoshi].filter((v) => v >= 78).length
+  if (trim === 3) {
+    lines.push('民安于野，吏谨于位，朝无大狱。数年之间，号为小康。')
+    score += 8
+  }
 
-  return { title, lines, score, people: peopleVerdict(s) }
+  /* 三面见底：不是守成，是坐在将倾的屋子里 */
+  const doomed = [s.truth.minxin, s.truth.guanfeng, s.truth.chaoshi, s.truth.bianfang].filter(
+    (v) => v < 20,
+  ).length
+  if (doomed >= 3) {
+    lines.push(
+      '四维之中，三面见底。内帑尚有银，而天下无人肯为你办事 ——' +
+        '这不是亡于兵，是亡于无人可用。',
+    )
+    score -= 25
+  }
+
+  /* 投献：册上的田，一亩一亩地躲进王府的优免册 */
+  const toux = Math.max(0, s.flags.touxian ?? 0)
+  if (toux >= 8) {
+    lines.push('投献之田已及数成：册上之田多为藩府、勋贵所据，赋役之基已空。')
+    score -= 10
+  } else if (toux >= 4) {
+    lines.push('投献渐多，册籍与实田已对不上。')
+    score -= 4
+  }
+
+  const title =
+    score >= 70
+      ? '可谓中兴'
+      : score >= 45
+        ? '可谓有为'
+        : score >= 20
+          ? '守成之主'
+          : score >= 0
+            ? '庸庸无失'
+            : '自此始怠'
+  // 章奏留中逾百件而国不亡者，史书另有一句评语
+  const finalTitle =
+    doomed >= 3 ? '国将不国' : s.backlog >= 120 ? '委政于人' : title
+
+  return { title: finalTitle, lines, score, people: peopleVerdict(s) }
 }
 
 

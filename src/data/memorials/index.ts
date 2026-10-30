@@ -7,6 +7,9 @@ import { FOREIGN_TEMPLATES } from './foreign'
 import { DISASTER_TEMPLATES } from './disaster'
 import { MISC_TEMPLATES } from './misc'
 import * as ST from './statute-triggers'
+import { COURT_TEMPLATES, MORE_OPEN_TEMPLATES } from './statute-open'
+import { NOISE_TEMPLATES } from './routine-noise'
+import { TOUXIAN_TEMPLATES } from './line-touxian'
 import { YEAR_1583 } from './year-1583'
 import { YEAR_1584_85 } from './year-1584-85'
 import { YEAR_1586_87 } from './year-1586-87'
@@ -29,6 +32,12 @@ const ALL = [
   ST.zlPrince,
   ST.ksRiot,
   ST.tzSilence,
+  ...ST.OPEN_TEMPLATES,
+  ...ST.REPORT_TEMPLATES,
+  ...MORE_OPEN_TEMPLATES,
+  ...COURT_TEMPLATES,
+  ...NOISE_TEMPLATES,
+  ...TOUXIAN_TEMPLATES,
   ...YEAR_1583,
   ...YEAR_1584_85,
   ...YEAR_1586_87,

@@ -74,6 +74,7 @@ export const weaving = def(
     secret: '织造太监的账，从来不给人看。这五千匹里，有一半是拿去卖到海外去的——打着「上用」的名。',
     yiEffect: { taicang: -4, metrics: { minxin: -1 } },
     patience: 8,
+    ignoredEffect: { metrics: { chaoshi: -1, guanfeng: -1 } },
     options: [
       { key: 'yi', label: '依拟', effect: { taicang: -4, metrics: { minxin: -1 } } },
       {
@@ -288,6 +289,7 @@ export const armory = def(
     secret: '「十年没晒过」是假话。真正的窟窿是每年领的修造银，都进了营官的口袋——这批军器报的是「已修」。',
     yiEffect: { taicang: -6, metrics: { bianfang: 1 } },
     patience: 6,
+    ignoredEffect: { metrics: { bianfang: -3 } },
     options: [
       { key: 'yi', label: '依拟', effect: { taicang: -6, metrics: { bianfang: 1 } } },
       {
@@ -340,6 +342,7 @@ export const recommend = def(
       secret: `${pick?.name ?? '此人'}是这位尚书的门生。荐举的规矩，本来就是拿人情换位置——只是这一次，这个人也许真的可用。`,
       yiEffect: { metrics: { guanfeng: 1 } },
       patience: 8,
+    ignoredEffect: { metrics: { chaoshi: -1 } },
       options: [
         { key: 'yi', label: '依拟（吏部查议）', effect: { metrics: { guanfeng: 1 } } },
         {

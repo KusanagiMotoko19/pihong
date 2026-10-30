@@ -256,12 +256,14 @@ describe('内廷', () => {
     expect(s.officers.some((o) => innerNames.has(o.name))).toBe(false)
   })
 
-  it('授权代批之后，案头的本子会自己变少', () => {
-    let s = initQueue(createInitialState())
-    s.autopilot = 2
-    const before = s.queue.length
-    s = advanceTurn(s)
-    expect(s.queue.length).toBeLessThan(before + 4)
+  it('授权代批之后，案头的本子比不授权时少', () => {
+    // 一旬进八到十本，代批只代两三本 —— 比的是「授不授权」，不是绝对数
+    let a = initQueue(createInitialState())
+    for (let i = 0; i < 3; i++) a = advanceTurn(a)
+    let b = initQueue(createInitialState())
+    b.autopilot = 2
+    for (let i = 0; i < 3; i++) b = advanceTurn(b)
+    expect(b.queue.length).toBeLessThan(a.queue.length)
   })
 
   it('锦衣卫拿人，位子空出来', () => {
@@ -375,9 +377,9 @@ describe('律令与奏疏联动', () => {
 
   it('开了矿税，地方上会闹', () => {
     let s = initQueue(createInitialState())
-    // 直接开到能动的旬数
+    // 直接开到能动的旬数，并把「开矿」的奏疏走一遍（法要有由头才立得起来）
     for (let i = 0; i < 20; i++) s = advanceTurn(s)
-    s = { ...s, energy: 8 }
+    s = { ...s, energy: 8, flags: { ...s.flags, open_kuangshui: 1 } }
     s = toggleStatute(s, 'kuangshui')
     expect(s.statutes.kuangshui).toBe(true)
     let found = false

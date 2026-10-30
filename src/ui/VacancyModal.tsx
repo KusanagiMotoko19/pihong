@@ -23,7 +23,7 @@ export function VacancyModal({
   const slot = OFFICE_BY_ID.get(officeId)
   const [q, setQ] = useState('')
   const ctl = partyController(s)
-  const raw = s.officers.filter((o) => o.officeId === null)
+  const raw = s.officers.filter((o) => o.officeId === null && (o.leaveUntil ?? 0) <= s.turn)
   // 党争坐大时，名单先列本党的人 —— 你能选，选谁都一样
   const pool = ctl
     ? [...raw.filter((o) => o.faction === ctl.faction), ...raw.filter((o) => o.faction !== ctl.faction)]

@@ -102,8 +102,8 @@ export function tickOrders(s: WorldState): void {
   const avgLian = serving.length
     ? serving.reduce((a, o) => a + o.lian, 0) / serving.length
     : 55
-  // 官风越坏，虚报越多
-  const padding = Math.max(0, (72 - s.truth.guanfeng) / 100 + (60 - avgLian) / 200)
+  // 官风越坏，虚报越多。一分之差，报上来的水分就多一分
+  const padding = Math.max(0, (74 - s.truth.guanfeng) / 70 + (60 - avgLian) / 150)
 
   for (const ord of s.orders) {
     if (ord.status !== 'running') continue
@@ -112,11 +112,16 @@ export function tickOrders(s: WorldState): void {
     const qin = o ? o.qin : 55
     const lian = o ? o.lian : 55
 
-    const gain = Math.max(2, (neng * 0.55 + qin * 0.35) / 12 - ord.resistance * 0.9)
+    // 朝局坏到一定程度，政令出了京就中格：同样的人、同样的钱，事办不下去
+    const court = 0.6 + s.truth.chaoshi / 250
+    const gain = Math.max(
+      1.2,
+      ((neng * 0.55 + qin * 0.35) / 12 - ord.resistance * 0.9) * court,
+    )
     ord.progress = Math.min(100, ord.progress + gain)
 
     const lie = Math.max(0, (100 - lian) / 100) * padding * 100
-    ord.reported = Math.min(100, Math.max(ord.progress, ord.reported + gain + lie * 0.12))
+    ord.reported = Math.min(100, Math.max(ord.progress, ord.reported + gain + lie * 0.08))
 
     if (s.turn >= ord.dueTurn && !ord.answered) {
       ord.answered = true

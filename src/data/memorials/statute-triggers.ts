@@ -397,3 +397,619 @@ export const tzSilence = def(
     when: (s) => on(s, 'tingzhang') && s.turn >= 12,
   },
 )
+
+/* ══════════════════════════════════════════════════════════════════ *
+ * 法是怎么被提出来的
+ *
+ * 律令不是菜单上随便点的一道菜。得先有人吃亏、有人看不过去，
+ * 把这件事写成本子递上来 —— 然后你才知道有这么一条路可以走。
+ * 没有这几本，律令页上看不见那条法。
+ * ══════════════════════════════════════════════════════════════════ */
+
+export const openYitiao = def(
+  'open-ytb',
+  'routine',
+  () => ({
+    from: '应天巡抚',
+    title: '为赋役繁杂、里甲赔累、乞行归并事',
+    summary: '南直隶一州县赋役名目三十余种，里甲赔累，请归并计亩征银。',
+    body:
+      `臣谨奏：南直隶赋役之弊，至今而极。\n\n` +
+      `一州县之内，赋有本色、折色、存留、起运；役有里甲、均徭、杂泛、驿传。` +
+      `名目三十余种，而小民所知者，只有「交多少」一句。\n\n` +
+      `胥吏因缘为奸：飞洒者，以己之田分寄他人；诡寄者，以田寄于举人、生员名下；` +
+      `包揽者，代纳而倍取其息。里甲十年一轮，轮到的倾家；轮不到的，出银买免。\n\n` +
+      `臣查苏州一府，额田九万顷，册上完粮者不过六万顷。其余三万顷，` +
+      `不在水，不在沙，在乡绅的「优免」两个字里。\n\n` +
+      `若将一州县赋役，量地计丁，并为一条，概以银输官，则胥吏无所措手。` +
+      `此法江西、浙江已有行者，臣请于南直隶试行。\n\n` +
+      `伏乞圣裁。`,
+    piaoni: '着户部覆议，令抚按详具条目以闻。',
+    secret:
+      '这本是应天巡抚自己写的，也是他自己想推的。' +
+      '推成之后，江南的钱粮从他手里过，说话的分量就不一样了。',
+    patience: 5,
+    yiEffect: { metric: { chaoshi: 1 } },
+    options: [
+      {
+        key: 'discuss',
+        label: '下部议，令抚按详具条目',
+        note: '把「一条鞭」三个字摆到朝上',
+        effect: {
+          metric: { chaoshi: 2 },
+          flags: { open_yitiaobian: 1 },
+          log: '诏下部议一条鞭法。江南士绅闻之，多有异言。',
+        },
+      },
+      {
+        key: 'slow',
+        label: '姑缓之，待清丈告竣再说',
+        note: '地亩还没核清，改赋役是白改',
+        effect: { metric: { chaoshi: -1 }, log: '一条鞭之议，暂缓。' },
+      },
+    ],
+  }),
+  {
+    // 走日常进本，不占叙事线的名额：这是议题，不是剧本
+    weight: 3,
+    cooldown: 55,
+    when: (s) => !on(s, 'yitiaobian') && s.turn >= 3,
+    forbids: ['open_yitiaobian'],
+  },
+)
+
+export const openKaihai = def(
+  'open-kh',
+  'routine',
+  () => ({
+    from: '福建巡抚',
+    title: '为海禁日久、私贩公行、乞开月港事',
+    summary: '海禁禁了二百年，禁出的是私贩，不是海船。请开月港，给引抽税。',
+    body:
+      `臣谨奏：闽中海禁，行二百年矣。然海未尝一日无人。\n\n` +
+      `漳州月港，私贩之船，岁不下三百。贩东西两洋，一船之利，可抵中人之产十家。` +
+      `禁之而不得禁，徒使奸民持官府之短，胥吏分其利。\n\n` +
+      `前年海道副使捕得私贩二十七船，尽没人官。船主皆漳泉大姓，` +
+      `其族人现在朝中为官者，有四。捕而未办，拖至今。\n\n` +
+      `臣请于月港开关：商民造船出海，官给引，抽其税。税入岁可得数万，` +
+      `而私贩之利，转在官。卫所不得擅拦，违者以枉法论。\n\n` +
+      `此事关祖宗之法，臣不敢专，伏乞圣裁。`,
+    piaoni: '着户部、兵部会议。',
+    secret:
+      '福建的卫所军官，一半的进项来自「查私」——查一条船，收一份钱。' +
+      '开了关，这笔钱就断了。所以第一个反对开海的，不会是言官，是水寨里的把总。',
+    patience: 4,
+    yiEffect: { metric: { chaoshi: -1 } },
+    options: [
+      {
+        key: 'open',
+        label: '着会议，许其开',
+        note: '祖宗之法，也要吃饭',
+        effect: {
+          metric: { bianfang: -1, minxin: 2 },
+          flags: { open_kaihai: 1 },
+          log: '诏议开月港。福建水寨把总联名上书，言「海防自此坏矣」。',
+        },
+      },
+      {
+        key: 'close',
+        label: '仍旧禁海，严拿私贩',
+        note: '守住祖制，也守住那三百条船的利',
+        effect: { metric: { bianfang: 1, minxin: -2 }, log: '诏仍旧禁海。私贩如故。' },
+      },
+    ],
+  }),
+  {
+    // 走日常进本，不占叙事线的名额：这是议题，不是剧本
+    weight: 3,
+    cooldown: 55,
+    when: (s) => !on(s, 'kaihai') && s.turn >= 4,
+    forbids: ['open_kaihai'],
+  },
+)
+
+export const openZonglu = def(
+  'open-zl',
+  'routine',
+  () => ({
+    from: '山西巡抚',
+    title: '为宗禄不给、岁支不敷、乞议折色事',
+    summary: '山西一省钱粮，宗禄占其大半；各王府禄米仍支本色，州县无以为继。',
+    body:
+      `臣谨奏：山西一省钱粮，岁入二百八十万石，宗禄一项，需二百四十万石。\n\n` +
+      `晋府、代府、沈府三王，岁支禄米各以万石计；郡王、将军、中尉以下，` +
+      `在册者三千余人，其支本色者，尚有一千二百。\n\n` +
+      `臣到任三年，藩司库中，常不能给。前月代府以禄米不至，遣人至布政司坐索，` +
+      `吏不敢出。此事若传至京，臣不敢料其终。\n\n` +
+      `今各王府禄米，若一律改折银两，每石折银五钱，则一岁所省，不下十万。` +
+      `然此非臣所敢议 —— 宗室之禄，是太祖高皇帝定的。\n\n` +
+      `伏乞圣裁。`,
+    piaoni: '着宗人府、户部会议具奏。',
+    secret:
+      '山西巡抚这一本，是替户部递的。' +
+      '户部这些年替宗禄填了不知多少窟窿，只是没人敢把「改折」两个字写在纸上。',
+    patience: 4,
+    yiEffect: { ledger: { taicang: 3 }, metric: { chaoshi: -2 } },
+    options: [
+      {
+        key: 'discuss',
+        label: '着会议，准改折',
+        note: '动了太祖的旧例，等于动了半个皇族',
+        effect: {
+          metric: { chaoshi: -3, guanfeng: 2 },
+          flags: { open_zonglu: 1 },
+          log: '诏议宗禄折色。宗人府奏：「祖制不可轻改。」',
+        },
+      },
+      {
+        key: 'hold',
+        label: '暂缓。宗室的事，不能由外臣议',
+        note: '省一笔麻烦，留一笔账',
+        effect: { ledger: { taicang: -4 }, log: '宗禄之议，暂缓。藩司库中又空了一次。' },
+      },
+    ],
+  }),
+  {
+    // 走日常进本，不占叙事线的名额：这是议题，不是剧本
+    weight: 3,
+    cooldown: 55,
+    when: (s) => !on(s, 'zonglu') && s.turn >= 6,
+    forbids: ['open_zonglu'],
+  },
+)
+
+export const openKuangshui = def(
+  'open-ks',
+  'routine',
+  (s) => ({
+    from: '内官监太监',
+    title: '为帑藏告匮、乞开矿抽税事',
+    summary: `太仓见底、内帑不足，奴才请开天下矿脉，抽分径解内帑。`,
+    body:
+      `奴才谨奏：今太仓所存，不过${Math.round(s.taicang)}万；内帑${Math.round(s.neitang)}万。` +
+      `九边的年例，下半年的一文未发；百官俸禄，已经欠了两个月。\n\n` +
+      `奴才查得：天下矿脉，山西、陕西、河南、湖广、云南皆有。` +
+      `往年禁民私采，而私采者未尝绝 —— 与其听奸民窃取，不若官为抽分。\n\n` +
+      `若遣内官分赴各省监矿，岁可得银数十万，径解内帑，不经户部。` +
+      `户部那些人不肯办，奴才肯办。\n\n` +
+      `只是有一节：矿脉所在，多在山田之间；开掘所至，必及民间田墓。` +
+      `地方官必不肯，生员必鼓噪，百姓未必肯让。此事奴才不敢欺瞒。\n\n` +
+      `伏乞圣裁。`,
+    piaoni: '开矿一事，祖宗朝屡有言者，然未见其利，先见其害。请旨裁夺。',
+    secret:
+      '这本是内官监递的，说话的却是司礼监。' +
+      '「径解内帑」四个字，是他们真正想要的东西 —— 钱不进户部的账，就不入外廷的眼。',
+    patience: 3,
+    yiEffect: { metric: { guanfeng: -2, minxin: -2 } },
+    options: [
+      {
+        key: 'open',
+        label: '着内官分赴各省监矿',
+        note: '内帑有进项了，地方要出人命',
+        effect: {
+          ledger: { neitang: 8 },
+          metric: { minxin: -6, guanfeng: -4, chaoshi: -3 },
+          flags: { open_kuangshui: 1 },
+          log: '诏遣内官监矿。各省抚按即时上疏，言「矿使所至，鸡犬不宁」。',
+        },
+      },
+      {
+        key: 'hold',
+        label: '不许。另议节用',
+        note: '宁可穷一点，不要这条口子',
+        effect: { metric: { chaoshi: 2, minxin: 2 }, log: '开矿之议，不许。' },
+      },
+    ],
+  }),
+  {
+    // 走日常进本，不占叙事线的名额：这是议题，不是剧本
+    weight: 3,
+    cooldown: 55,
+    when: (s) => !on(s, 'kuangshui') && s.turn >= 10 && (s.taicang < 160 || s.neitang < 130),
+    forbids: ['open_kuangshui'],
+  },
+)
+
+export const openTingzhang = def(
+  'open-tz',
+  'routine',
+  () => ({
+    from: '都察院左都御史',
+    title: '为言路纷争、纲纪不肃、乞赐处分事',
+    summary: '科道连章攻讦，一事十疏，朝堂之上已无议事之序。',
+    body:
+      `臣谨奏：近者科道诸臣，一事而十疏，一疏而十辩。\n\n` +
+      `攻人者曰「大奸」，辩者曰「诬枉」；攻者再疏，辩者亦再疏。` +
+      `所论者，多非国事，而是彼此的门户。\n\n` +
+      `臣为都御史，不能弹压。盖言官有言责，臣若抑之，是臣塞言路；` +
+      `臣若不抑，是臣纵其相攻。两难之中，谨以实闻。\n\n` +
+      `祖宗朝有「廷杖」之例：言事失当者，锦衣卫于午门外杖之。用之者少，而人皆震惧。` +
+      `臣不敢请用，亦不敢不奏。\n\n` +
+      `伏乞圣裁。`,
+    piaoni: '言官论事，自有其责。若以杖责之，恐塞忠谏之路。',
+    secret:
+      '都御史这本，写得极小心。他不请用杖，只说「不敢不奏」——' +
+      '把刀递到你手上，日后若士林有怨，他可以说：臣只是奏闻。',
+    patience: 4,
+    yiEffect: { metric: { chaoshi: -1 } },
+    options: [
+      {
+        key: 'ready',
+        label: '着锦衣卫备杖，以待旨',
+        note: '不必真打，让人知道午门有这根杖',
+        effect: {
+          metric: { chaoshi: 3, guanfeng: -2 },
+          flags: { open_tingzhang: 1 },
+          log: '诏锦衣卫备杖午门。科道诸臣，一时都安静了不少。',
+        },
+      },
+      {
+        key: 'calm',
+        label: '降旨戒谕，勿问其人',
+        note: '先讲道理，道理讲不通再说',
+        effect: { metric: { chaoshi: 1, guanfeng: 1 }, log: '降旨戒谕科道，令其各守职掌。' },
+      },
+    ],
+  }),
+  {
+    // 走日常进本，不占叙事线的名额：这是议题，不是剧本
+    weight: 3,
+    cooldown: 55,
+    when: (s) => !on(s, 'tingzhang') && s.turn >= 8 && (s.backlog >= 10 || s.truth.chaoshi < 60),
+    forbids: ['open_tingzhang'],
+  },
+)
+
+/* ══════════════════════════════════════════════════════════════════ *
+ * 法立之后，得有人办，办完得有回话
+ *
+ * 这六本不是「反弹」，是「执行」。每一个都带着数目 —— 数目是真的
+ * （从 statutes.ts 记的账上取），但说话的人未必老实。
+ * ══════════════════════════════════════════════════════════════════ */
+
+export const repKaocheng = def(
+  'rep-kaocheng',
+  'routine',
+  (s) => {
+    const runs = Math.round(s.flags['runs_kaocheng'] ?? 0)
+    const demoted = Math.max(3, Math.round(runs / 2))
+    const cleared = Math.round(runs * 0.4)
+    return {
+      from: '吏部尚书',
+      title: '为考成岁报、分别举劾事',
+      summary: `考成行至今日，京官降黜${demoted}员，案牍清出${cleared}件。`,
+      body:
+        `臣谨奏：考成一法，行至今日，计${runs}旬。\n\n` +
+        `本年京察、外察，以「征赋不足九成」降级者${demoted}员，` +
+        `其中知县十之七，推官十之二，同知以下十之一。\n\n` +
+        `各省逋欠，追解者已清${cleared}件。然臣有一言：` +
+        `降级的这些人里，有真怠惰的，也有真收不上来的。` +
+        `山东、河南连岁旱蝗，粮无从出；州县官不敢报灾，只敢报「未完」。\n\n` +
+        `臣请：凡灾伤之地，乞准展限；其余照旧考成。`,
+      piaoni: '着吏部照例举行。',
+      secret:
+        '吏部尚书这本，一半是替州县求情，一半是替自己表功 ——' +
+        '考成是他衙门里办的，降级的人越多，他的功劳越大，士林的怨也越深。',
+      patience: 5,
+      yiEffect: { metric: { chaoshi: 1, guanfeng: -1 } },
+      options: [
+        {
+          key: 'strict',
+          label: '不许展限。法一立，不容例外',
+          note: '考成之所以有用，就在不容例外',
+          effect: {
+            ledger: { taicang: 8 },
+            metric: { minxin: -4, guanfeng: 2, chaoshi: -3 },
+          },
+        },
+        {
+          key: 'relief',
+          label: '灾伤之地，准其展限',
+          note: '少收一笔，少逼反一批',
+          effect: {
+            ledger: { taicang: -4 },
+            metric: { minxin: 5, chaoshi: 2, guanfeng: -2 },
+          },
+        },
+      ],
+    }
+  },
+  {
+    weight: 1,
+    cooldown: 14,
+    when: (s) => on(s, 'kaocheng') && (s.flags['runs_kaocheng'] ?? 0) >= 6,
+  },
+)
+
+export const repYitiao = def(
+  'rep-ytb',
+  'routine',
+  (s) => {
+    const y = Math.round((s.flags['yield_yitiaobian'] ?? 0) * 10) / 10
+    const runs = Math.round(s.flags['runs_yitiaobian'] ?? 0)
+    return {
+      from: '户部尚书',
+      title: '为条鞭岁入、类报完欠事',
+      summary: `一条鞭行至今日，折银解到太仓共${Math.round(y)}万两。`,
+      body:
+        `臣谨奏：一条鞭法行于南直隶、浙江、江西诸处，计${runs}旬。\n\n` +
+        `凡赋役归并、计亩征银者，共一百零七州县。` +
+        `折银解到太仓者，前后共${Math.round(y)}万两；` +
+        `较之旧额，岁增约${Math.max(1, Math.round((y / Math.max(1, runs)) * 36))}万两。\n\n` +
+        `然臣不能不奏者三事：\n` +
+        `一、秋成卖谷换银，谷贱银贵，苏松常三府，每两多折一钱，民用苦之；\n` +
+        `二、里甲归并之后，胥吏无从包揽，改在「秤头」「火耗」上取；\n` +
+        `三、江北诸府，田瘠而赋重，折银之后，逃亡者渐多。\n\n` +
+        `法未尝不善，行之者不善耳。`,
+      piaoni: '着户部查核，务使小民不受加耗之累。',
+      secret:
+        '「火耗」两个字，是这本的关键。' +
+        '归并之弊去了，加耗之弊来了 —— 换一个名目，还是那一份钱。户部自己也抽这一份。',
+      patience: 5,
+      yiEffect: { ledger: { taicang: 2 }, metric: { minxin: -1 } },
+      options: [
+        {
+          key: 'chase',
+          label: '严追未完，火耗一并清查',
+          note: '钱要收到位，但州县又要敲一回',
+          effect: {
+            ledger: { taicang: 9 },
+            metric: { minxin: -5, guanfeng: 2 },
+          },
+        },
+        {
+          key: 'cap',
+          label: '定火耗之数，不得多取',
+          note: '给州县留一条活路，也给自己留个名',
+          effect: {
+            ledger: { taicang: -3 },
+            metric: { minxin: 4, guanfeng: 1, chaoshi: -1 },
+          },
+        },
+      ],
+    }
+  },
+  {
+    weight: 1,
+    cooldown: 14,
+    when: (s) => on(s, 'yitiaobian') && (s.flags['runs_yitiaobian'] ?? 0) >= 6,
+  },
+)
+
+export const repKaihai = def(
+  'rep-kh',
+  'routine',
+  (s) => {
+    const y = Math.round((s.flags['yield_kaihai'] ?? 0) * 10) / 10
+    const runs = Math.round(s.flags['runs_kaihai'] ?? 0)
+    const ships = Math.max(12, Math.round(runs * 6))
+    return {
+      from: '福建巡抚',
+      title: '为月港税课、类报船货事',
+      summary: `月港开关至今，商船${ships}艘，关税解到${Math.round(y)}万两。`,
+      body:
+        `臣谨奏：月港开关，计${runs}旬。\n\n` +
+        `出海商船，前后${ships}艘，往吕宋、往暹罗、往日本者皆有。` +
+        `关税所入，解太仓者共${Math.round(y)}万两；` +
+        `另有市舶司存留，供本省水寨之用。\n\n` +
+        `有一事臣不敢不奏：商船既众，其中夹带者亦众。` +
+        `前月查得三船，舱底藏铁器、硝黄，问之，曰「往吕宋市磺」。` +
+        `此物出洋，回来就是倭人的炮。\n\n` +
+        `臣请于月港设盘验之法：出海验货，回港验船。` +
+        `然盘验需人，需饷，岁约六万两 —— 这笔钱，从关税里出，还是从太仓出？`,
+      piaoni: '着福建抚按议奏。',
+      secret:
+        '「往吕宋市磺」这一句，福建巡抚写了又划掉，划了又写上。' +
+        '他知道报上去会被人拿来做文章 —— 但他也知道，不报，日后出事是他的。',
+      patience: 4,
+      yiEffect: { ledger: { taicang: 3 } },
+      options: [
+        {
+          key: 'patrol',
+          label: '设盘验，岁费六万，从关税出',
+          note: '关税少解一点，海防稳一点',
+          effect: {
+            metric: { bianfang: 6, chaoshi: 2 },
+            flags: { kh_patrol: 1 },
+          },
+        },
+        {
+          key: 'loose',
+          label: '不必盘验，只照旧抽税',
+          note: '钱先收着，将来的事将来再说',
+          effect: {
+            ledger: { taicang: 6 },
+            metric: { bianfang: -3 },
+          },
+        },
+      ],
+    }
+  },
+  {
+    weight: 1,
+    cooldown: 14,
+    when: (s) => on(s, 'kaihai') && (s.flags['runs_kaihai'] ?? 0) >= 6,
+  },
+)
+
+export const repZonglu = def(
+  'rep-zl',
+  'routine',
+  (s) => {
+    const y = Math.round((s.flags['yield_zonglu'] ?? 0) * 10) / 10
+    const runs = Math.round(s.flags['runs_zonglu'] ?? 0)
+    return {
+      from: '山西巡抚',
+      title: '为宗禄折色岁报、王府怨望事',
+      summary: `宗禄改折${runs}旬，省下${Math.round(y)}万两；各王府怨言渐起。`,
+      body:
+        `臣谨奏：宗禄改折，行于山西、河南、湖广，计${runs}旬。\n\n` +
+        `折色所省，解太仓者共${Math.round(y)}万两。藩司库中，` +
+        `自臣到任以来，第一次没有向户部告匮。\n\n` +
+        `然各王府怨望日深。晋王遣人至臣衙门，言「祖宗之法，非外臣所得议」；` +
+        `代府则以禄米不至，闭门不纳地方官。更有宗室数十人，` +
+        `聚于藩司门前，言「饿死也是死，不如死在布政司」。\n\n` +
+        `臣请：于折色之外，量为周恤 —— 贫宗无禄者，岁给米若干，` +
+        `庶几不至于生变。此项岁需不过二万两。`,
+      piaoni: '着宗人府议奏。',
+      secret:
+        '「饿死也是死」这句话，是宗室说的，也是山西巡抚想让你听见的。' +
+        '他知道这笔省下来的钱最后要落到哪里 —— 落不到贫宗身上。',
+      patience: 4,
+      yiEffect: { ledger: { taicang: 2 }, metric: { chaoshi: -1 } },
+      options: [
+        {
+          key: 'relief',
+          label: '准周恤贫宗，岁给二万',
+          note: '花小钱，压住一个可能炸的地方',
+          effect: {
+            ledger: { taicang: -2 },
+            metric: { chaoshi: 5, minxin: 1 },
+            flags: { zl_relief: 1 },
+          },
+        },
+        {
+          key: 'hard',
+          label: '不许。宗禄已定，哭穷者削其禄',
+          note: '硬到底。宗室会记很久',
+          effect: {
+            metric: { chaoshi: -6, guanfeng: 2 },
+            ledger: { taicang: 4 },
+            flags: { zl_hard: 1 },
+          },
+        },
+      ],
+    }
+  },
+  {
+    weight: 1,
+    cooldown: 14,
+    when: (s) => on(s, 'zonglu') && (s.flags['runs_zonglu'] ?? 0) >= 6,
+  },
+)
+
+export const repKuang = def(
+  'rep-ks',
+  'routine',
+  (s) => {
+    const real = Math.round((s.flags['yield_kuangshui'] ?? 0) * 10) / 10
+    // 内监报上来的数，比实解的多两成 —— 这一成半，是他们自己的
+    const claimed = Math.round(real * 1.2)
+    const runs = Math.round(s.flags['runs_kuangshui'] ?? 0)
+    return {
+      from: '内官监太监',
+      title: '为矿课解进、恭报数目事',
+      summary: `各省矿使解进内帑，前后共${claimed}万两。`,
+      body:
+        `奴才谨奏：矿税之行，计${runs}旬。\n\n` +
+        `山西、陕西、河南、湖广、云南五省，设矿使二十七处，` +
+        `解进内帑者，前后共${claimed}万两。此皆不经户部，径解内库，` +
+        `账目清楚，可备查考。\n\n` +
+        `各省抚按，屡有奏称「矿使扰民」者。奴才不敢辩，只奏一事：` +
+        `所解之数，奴才一文未敢私留。若皇上不信，可遣人查库。\n\n` +
+        `再，湖广、江西矿脉渐薄，往后所入，恐不及此数。奴才预为奏闻。`,
+      piaoni: '知道了。',
+      secret:
+        `实解内帑的数是${real}万两。多出来的那一截，` +
+        '内官监说是「耗羡」，其实是各矿使按季孝敬的例规。' +
+        '你若不查，账永远是平的；你一查，账也是平的 —— 只是数字会变小。',
+      patience: 3,
+      yiEffect: { ledger: { neitang: 3 }, metric: { minxin: -2, guanfeng: -1 } },
+      options: [
+        {
+          key: 'audit',
+          label: '遣锦衣卫核库',
+          note: '查得出来，也得罪人',
+          effect: {
+            ledger: { neitang: -6 },
+            metric: { guanfeng: 3, minxin: 3, chaoshi: -2 },
+            flags: { ks_audited: 1 },
+          },
+        },
+        {
+          key: 'accept',
+          label: '知道了，照旧解进',
+          note: '账是平的，人心不是',
+          effect: {
+            ledger: { neitang: 5 },
+            metric: { guanfeng: -2, minxin: -3 },
+          },
+        },
+      ],
+    }
+  },
+  {
+    weight: 1,
+    cooldown: 14,
+    when: (s) => on(s, 'kuangshui') && (s.flags['runs_kuangshui'] ?? 0) >= 6,
+  },
+)
+
+export const repTingzhang = def(
+  'rep-tz',
+  'routine',
+  (s) => {
+    const runs = Math.round(s.flags['runs_tingzhang'] ?? 0)
+    const beaten = Math.max(2, Math.round(runs / 4))
+    const vacant = Math.min(34, 8 + Math.round(runs / 3))
+    return {
+      from: '都察院左都御史',
+      title: '为杖责人数、科道缺员事',
+      summary: `前后杖责${beaten}人，六科给事中缺员${vacant}员，言事者日少。`,
+      body:
+        `臣谨奏：廷杖之例行，前后杖责${beaten}人。\n\n` +
+        `六科给事中，额设五十八员，今在任者三十四员，缺员${vacant}员。` +
+        `都察院十三道御史，缺员亦半。\n\n` +
+        `缺员之故，臣不敢隐：非无才可选，是无敢来。` +
+        `前月吏部以六人名上，五人辞。内一人回书曰：「臣有老母在堂，` +
+        `不敢以一身试杖。」\n\n` +
+        `言路无人，则天下之弊，无人上闻。今日之患，不在言官太横，` +
+        `在言官太静。太静的时候，坏事就不出声了。`,
+      piaoni: '着吏部另行拣选。',
+      secret:
+        '都御史这本，是替言路求活。他自己也在怕 ——' +
+        '上一回杖责的名单，是司礼监拟的，他是看着名单才知道要打谁。',
+      patience: 4,
+      yiEffect: { metric: { chaoshi: -2 } },
+      options: [
+        {
+          key: 'pardon',
+          label: '起复被杖诸臣，补足科道',
+          note: '认个错。士林会记这一笔',
+          effect: {
+            metric: { chaoshi: 8, guanfeng: 4 },
+            backlog: -3,
+            flags: { tz_restored: 1 },
+          },
+        },
+        {
+          key: 'more',
+          label: '再杖二人，以正纲纪',
+          note: '压得更狠，静得更彻底',
+          effect: {
+            metric: { chaoshi: -6, guanfeng: -3 },
+            backlog: -5,
+          },
+        },
+      ],
+    }
+  },
+  {
+    weight: 1,
+    cooldown: 14,
+    when: (s) => on(s, 'tingzhang') && (s.flags['runs_tingzhang'] ?? 0) >= 6,
+  },
+)
+
+/** 解锁法度的奏疏（未出，则律令页上不显示那条法） */
+export const OPEN_TEMPLATES = [openYitiao, openKaihai, openZonglu, openKuangshui, openTingzhang]
+
+/** 各法施行之后的执行汇报（带真数） */
+export const REPORT_TEMPLATES = [
+  repKaocheng,
+  repYitiao,
+  repKaihai,
+  repZonglu,
+  repKuang,
+  repTingzhang,
+]

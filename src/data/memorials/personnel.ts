@@ -18,7 +18,7 @@ export const tingtui = def(
   (s: WorldState) => {
     const vid = pickVacancy(s) ?? 'hubu-zuo'
     const slot = OFFICE_BY_ID.get(vid)!
-    const picks = candidatesFor(s.officers, vid, 3)
+    const picks = candidatesFor(s.officers, vid, 3, s.turn)
     const names = picks.map((p) => `${p.name}（${p.origin}人，${p.jinshi}）`).join('；')
     return {
       from: '吏部尚书',
@@ -92,6 +92,7 @@ export const kaoman = def(
         log: '考察如议。十七员降黜，五员致仕。',
       },
       patience: 5,
+    ignoredEffect: { metrics: { guanfeng: -2 } },
       options: [
         {
           key: 'yi',
@@ -147,7 +148,7 @@ export const dingyou = def(
         `臣不敢拟。请皇上自己定。`,
       piaoni: '着吏部议。',
       yiEffect: {
-        appoint: { officerId: target.id, officeId: null },
+        leave: { officerId: target.id, xun: 81 },
         metrics: { guanfeng: 1, chaoshi: 1 },
         log: `${target.name}回籍守制。他的位子空着，事交别人署理。`,
       },
@@ -157,9 +158,9 @@ export const dingyou = def(
           key: 'yi',
           label: '依拟（准其守制）',
           effect: {
-            appoint: { officerId: target.id, officeId: null },
+            leave: { officerId: target.id, xun: 81 },
             metrics: { guanfeng: 1, chaoshi: 1 },
-            log: `${target.name}回籍守制。`,
+            log: `${target.name}回籍守制。二十七个月之内，不在起用之列。`,
           },
         },
         {
@@ -182,7 +183,7 @@ export const dingyou = def(
           needsReading: true,
           note: '人情两全。但你得找到人',
           effect: {
-            appoint: { officerId: target.id, officeId: null },
+            leave: { officerId: target.id, xun: 81 },
             metrics: { guanfeng: 2, chaoshi: -1 },
             energy: -1,
             log: `准${target.name}守制，另简人接任。新来的那位，头一个月什么也没动。`,

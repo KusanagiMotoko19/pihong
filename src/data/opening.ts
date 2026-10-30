@@ -23,8 +23,8 @@ export function createInitialState(seed = 20261030): WorldState {
   const base: WorldState = {
     date: { ...START },
     turn: 0,
-    energy: 8,
-    maxEnergy: 8,
+    energy: 10,
+    maxEnergy: 10,
 
     taicang: 380,
     neitang: 200,

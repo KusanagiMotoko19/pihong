@@ -319,12 +319,3 @@ export function intelFromOffice(s: WorldState, officeId: string | null): { key: 
   return { key: pool[s.turn % 4], label: '职掌所及' }
 }
 
-/** 该人是不是个可用之才（召对时用得着） */
-export function talentOf(s: WorldState, id: string): string | null {
-  const o = s.officers.find((x) => x.id === id)
-  if (!o) return null
-  if (o.officeId) return null
-  if (o.reputation >= 78) return '此人在士林中有声，可用。'
-  return null
-}
-

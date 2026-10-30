@@ -52,7 +52,7 @@ export function MemorialView({
           </div>
           <div className="sc-duty">职掌：{slot.duty}</div>
           <div className="sc-praise">考语：{sender.appraisal}</div>
-          <div className="sc-tip">点开看他的履历与五维</div>
+          <div className="sc-tip">点开看他的履历与考语</div>
         </div>
       )}
 

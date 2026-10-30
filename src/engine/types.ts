@@ -98,6 +98,8 @@ export interface Officer {
   privateLife: string
   /** 他要什么。升迁、回乡、请封、保子孙——你不给，他就自己找。 */
   want: string
+  /** 丁忧守制到第几旬。守制的人不在候选名录里，也不能被起用 */
+  leaveUntil?: number
 }
 
 /** 说话的样式 */
@@ -295,6 +297,11 @@ export interface Effect {
     officerId: string
     officeId: string | null
   }
+  /** 守制：某人回籍丁忧，多少旬内不得起用 */
+  leave?: {
+    officerId: string
+    xun: number
+  }
 }
 
 /** 批红选项。玩家细看后才看得到「改拟」的备选。 */
@@ -430,6 +437,8 @@ export interface MemorialTemplate {
   weight?: number
   /** 冷却：同一模板至少隔多少旬才可能再出 */
   cooldown?: number
+  /** 只出一次的事（籍没、抄家、册立这类）：出过就不再进本 */
+  once?: boolean
   /** 判定是否需要生成（满足条件才进本）。不写则恒真。 */
   when?: (s: WorldState) => boolean
   /** 需要哪些 flag 已置位才出（网状叙事用） */

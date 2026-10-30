@@ -140,6 +140,7 @@ export const arrears = def(
       log: '户部议覆，追解逋欠八万两。',
     },
     patience: 4,
+    ignoredEffect: { taicang: -5 },
     options: [
       { key: 'yi', label: '依拟', effect: { taicang: 8, metrics: { minxin: -1 } } },
       {

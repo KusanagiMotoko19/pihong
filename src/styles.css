@@ -554,6 +554,12 @@ button.primary:hover:not(:disabled) {
   margin: 0 auto;
   padding: 40px 20px;
   text-align: center;
+  /* 结局页自己滚。手机上 body/#root 被锁成 100dvh + overflow:hidden，
+     而结局页不在 .main 里 —— 之前超出屏幕的部分直接被切掉，滑不动。 */
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .verdict h1 {
@@ -1899,6 +1905,112 @@ button.primary:hover:not(:disabled) {
   margin-top: 8px;
   font-size: 12px;
   color: var(--cinnabar);
+}
+
+/* 每旬效果：一直显示，别让人猜这条法到底在干什么 */
+.st-effect {
+  margin: 7px 0 0;
+  padding: 0 0 0 14px;
+  list-style: none;
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.85;
+}
+
+.st-effect li {
+  position: relative;
+}
+
+.st-effect li::before {
+  content: '·';
+  position: absolute;
+  left: -10px;
+  color: var(--rule-strong);
+}
+
+.st-yield {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+.st-after {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--ink-faint);
+  line-height: 1.8;
+}
+
+.st-lock {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  letter-spacing: 0.04em;
+}
+
+.st-hidden {
+  margin: 14px 0 4px;
+  padding: 9px 12px;
+  border: 1px dashed var(--rule-strong);
+  font-size: 12px;
+  color: var(--ink-faint);
+  line-height: 1.8;
+}
+
+/* 分组：财政/吏治/军务/士林/宗室 */
+.st-group {
+  margin-bottom: 6px;
+}
+
+.st-group-name {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--ink-faint);
+  padding: 10px 0 6px;
+  border-bottom: 1px dotted var(--rule);
+  margin-bottom: 10px;
+}
+
+/* 得失两栏：得取绿，失取朱 —— 一眼看出这是笔什么买卖 */
+.st-effect.gain {
+  color: #3f6b46;
+}
+
+.st-effect.cost {
+  color: var(--cinnabar);
+}
+
+.st-effect.gain li::before {
+  content: '＋';
+  color: #3f6b46;
+}
+
+.st-effect.cost li::before {
+  content: '－';
+  color: var(--cinnabar);
+}
+
+.st-goods {
+  margin-top: 9px;
+  padding: 9px 11px;
+  border: 1px dotted var(--rule-strong);
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--ink-soft);
+}
+
+.st-goods .st-k {
+  display: inline-block;
+  min-width: 4.5em;
+  color: var(--ink-faint);
+  letter-spacing: 0.1em;
+}
+
+.st-rival {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--indigo);
 }
 
 .st-foot {

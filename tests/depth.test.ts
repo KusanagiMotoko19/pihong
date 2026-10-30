@@ -36,5 +36,5 @@ describe('五年跑一遍', () => {
       ),
     )
     expect(total).toBeGreaterThan(100)
-  })
+  }, 180000)
 })

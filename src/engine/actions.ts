@@ -151,6 +151,8 @@ export function projectAction(
     next.energy -= 2
     p.exposed = true
     p.progress = Math.min(100, p.progress + 1)
+    // 亲阅册籍，投献的田就藏不住了：看得见的账，才收得回来
+    next.flags.touxian = Math.max(0, (next.flags.touxian ?? 0) - 1)
     p.history.push({ turn: next.turn, text: '上亲阅册籍，虚实始见。' })
     next.log.push({
       turn: next.turn,
@@ -184,6 +186,8 @@ export function appointOfficer(
   const next = cloneState(s)
   const o = next.officers.find((x) => x.id === officerId)
   if (!o) return s
+  // 守制未满的人不能起用
+  if (officeId && (o.leaveUntil ?? 0) > s.turn) return s
   if (officeId) {
     // 一个位子只坐一个人
     for (const other of next.officers) {
